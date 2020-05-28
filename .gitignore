@@ -1,0 +1,5 @@
+# target folder
+target/
+
+# OSX artifacts
+.DS_Store

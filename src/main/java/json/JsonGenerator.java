@@ -9,14 +9,18 @@ import java.util.ArrayList;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import com.google.gson.*;
 
 public class JsonGenerator {
 	@SuppressWarnings("unchecked")
 	 public static void main( String[] args )
 	    {
-		
-			File folder = new File("../data/1000files/");
-			int step = 5; //the number of files for each job
+			String input_folder = args[0]; //input folder, "/Users/dangh/eclipse-workspace/muscle-container/data/";
+			String output_fname = args[1]; //output file; "muscle_jobs_output.json";
+			//System.out.println("args:" + args[0] + "," + args[1]);
+			//File folder = new File(base_folder+"input");
+			File folder = new File(input_folder);
+			int step = 1; //the number of files for each job
 			File[] listOfFiles = folder.listFiles(new FilenameFilter() {
 		        @Override
 		        public boolean accept(File dir, String name) {
@@ -28,14 +32,14 @@ public class JsonGenerator {
 			
 			
 			List<String> cmdList = new ArrayList<String>();
-			cmdList.add("./execute.sh");
+			cmdList.add("./app/execute.sh");
 	        
 	        JSONArray jobList = new JSONArray();
 
 	        int count=0;
 			for (int i = 0; i < listOfFiles.length; i=i+step) {
 				List<String> sList = new ArrayList<String>();
-				sList.add(Integer.toString(step));
+				//sList.add(Integer.toString(step)); //number of files for each step
 				int k = i;
 		        JSONArray taskList = new JSONArray();
 				while(k < i + step && k < noFile) {
@@ -48,7 +52,7 @@ public class JsonGenerator {
 						 // System.out.println(charSeq);
 						  String new_fname = fname.replace(" ",replacement);
 						  //System.out.println(new_fname);
-					      sList.add(new_fname);
+					      sList.add("../data/input/"+new_fname);
 					}	
 					k = k+1;
 				}
@@ -115,9 +119,13 @@ public class JsonGenerator {
 	        jobsDescription.put("jobs",jobList);
 	         
 	        //Write JSON file
-	        try (FileWriter file = new FileWriter("sse-testing.json")) {
+	        try (FileWriter file = new FileWriter(output_fname)) {
 	 
-	            file.write(jobsDescription.toJSONString());
+	            //file.write(jobsDescription.toJSONString());
+	        	//file.write(jobsDescription.toJSONString(4));
+	        	Gson gson = new GsonBuilder().setPrettyPrinting().create();
+	        	String jsonOutput = gson.toJson(jobsDescription);
+	        	file.write(jsonOutput);
 	            file.flush();
 	 
 	        } catch (IOException e) {
